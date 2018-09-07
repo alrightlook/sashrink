@@ -201,6 +201,7 @@ bool initRealbinFileOpen(const char *realbinfilename, const char *addrbinfilenam
 			if( decoder( g_realgetimagebuf, bmpdata,
 					(unsigned int*)&width, (unsigned int*)&height, &len ) == NULL ){
 					unsigned int bmpNo = tmpadrnbuff.bitmapno;
+					SDL_Log("Jerry Should Export to file?");
 			}
 			else
 			{
@@ -220,7 +221,7 @@ bool initRealbinFileOpen(const char *realbinfilename, const char *addrbinfilenam
 				if(tmpadrnbuff.attr.bmpnumber == 26301){
 					SDL_Log("Jerry attrno is %d", bmpNo);
 				}
-				SDL_Log("%d, ---bmpNo: %d", tmpadrnbuff.attr.bmpnumber, bmpNo);
+				//SDL_Log("%d, ---bmpNo: %d", tmpadrnbuff.attr.bmpnumber, bmpNo);
 //				printf("%d\n", bmpNo);
 			}
 		}
@@ -409,9 +410,9 @@ int main(int argc, char* argv[])
     init();
     unpacking();
     bool quit = false;
-    SDL_Window* window = SDL_CreateWindow("PocketSATools", 100, 100, 800, 600, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL_Texture* screenTexture = SDL_CreateTextureFromSurface(renderer, screenSurface);
+//    SDL_Window* window = SDL_CreateWindow("PocketSATools", 100, 100, 800, 600, 0);
+  //  SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    //SDL_Texture* screenTexture = SDL_CreateTextureFromSurface(renderer, screenSurface);
     int screenPitch = 600 * sizeof(int);
     void* pixels;
     while(adrnbuff[currentShowImageNo].bitmapno == 0)
@@ -420,7 +421,7 @@ int main(int argc, char* argv[])
     }
     SDL_Log("Jerry : First bitmapNo is %d, %d", adrnbuff[currentShowImageNo].bitmapno, currentShowImageNo);
 
-    while(!quit)
+/*    while(!quit)
     {
     	SDL_RenderClear(renderer);
     	SDL_Event e;
@@ -437,7 +438,7 @@ int main(int argc, char* argv[])
 			{
 				currentShowImageNo = currentShowImageNo - 1 <= 0 ? 1 : currentShowImageNo - 1;
 				char buffer[255];
-				sprintf(buffer, "PocketSaTools: %d", currentShowImageNo);
+				sprintf(buffer, "PocketSaTools: %d, %d", currentShowImageNo, adrnbuff[currentShowImageNo].attr.bmpnumber);
 				SDL_SetWindowTitle(window, buffer);
 			}
 			else if(e.key.keysym.sym == SDLK_RIGHT)
@@ -465,7 +466,7 @@ int main(int argc, char* argv[])
     }
     SDL_DestroyRenderer(renderer);
     SDL_FreeSurface(screenSurface);
-    SDL_DestroyTexture(screenTexture);
+    SDL_DestroyTexture(screenTexture);*/
     SDL_Quit();
     return 0;
 }
