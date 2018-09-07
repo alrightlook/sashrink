@@ -158,9 +158,7 @@ void exportToFile(ADRNBIN data, unsigned char** bmpdata, int width, int height)
 	char buff[255];
 	sprintf(buff, "./output/%d.bmp", data.attr.bmpnumber);
 	printf("file: buff:%s", buff);
-    if (data.attr.bmpnumber ==29027) {
-            SDL_SaveBMP(surf, buff);
-    }
+	SDL_SaveBMP(surf, buff);
 	
     SDL_FreeSurface(surf);
 }
@@ -202,6 +200,7 @@ bool initRealbinFileOpen(const char *realbinfilename, const char *addrbinfilenam
 					(unsigned int*)&width, (unsigned int*)&height, &len ) == NULL ){
 					unsigned int bmpNo = tmpadrnbuff.bitmapno;
 					SDL_Log("Jerry Should Export to file?");
+					exportToFile(tmpadrnbuff, bmpdata, width, height);
 			}
 			else
 			{
