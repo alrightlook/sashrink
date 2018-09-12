@@ -8,6 +8,8 @@
 #include "unpack.h"
 #include "types.h"
 #include "surface.h"
+#include "FreeImage.h"
+
 
 FILE *Realbinfp;
 FILE *Addrbinfp;
@@ -23,6 +25,7 @@ int RealBinHeight = 0;
 char *pRealBinBits;
 int maxBitmapNo = 0;
 
+int totalExportCount = 0;
 char cmdBuffer[255];
 
 #define REALGETIMAGEMAXSIZE 3200*3200
@@ -134,33 +137,46 @@ void PaletteForColors(PALETTEENTRY* pal)
     }
 }
 
+void exportPNG(ADRNBIN data, unsigned char** bmpdata, int width, int height)
+{
+	char filenameBuff[255];
+	sprintf(filenameBuff, "%d.png", data.attr.bmpnumber);
+        bool readImageRes = realGetImage(data.bitmapno,(unsigned char **)&pRealBinBits, &RealBinWidth,&RealBinHeight);	
+	DrawBitmapToPNG(0, 0, RealBinWidth, RealBinHeight, (unsigned char**)&pRealBinBits, filenameBuff);
+}
+
 void exportToFile(ADRNBIN data, unsigned char** bmpdata, int width, int height)
 {
-	printf("Export");
-	int sizeX = width;
-	int sizeY = height;
-	unsigned char *pSource;
-	int offsetY = height - 1;
-	int offsetX = 0;
-    pSource = *bmpdata + offsetY * width + offsetX;
-    static SDL_Color* pixelDataSurface = (SDL_Color*)malloc(1600* 1600* sizeof(SDL_Color));
-	int currentPixelPos = 0;
-	for(int i = 0; i < sizeY; i++)
+	if(totalExportCount <= 100)
 	{
-		for(int j = 0; j < sizeX ; j++)
-		{
-			pixelDataSurface[currentPixelPos + j ]  = highColor32Palette[pSource[j]];
-		}
-		pSource -= width;
-		currentPixelPos += sizeX;
+		totalExportCount ++;
 	}
-	SDL_Surface* surf = createSDLSurface(sizeX, sizeY, pixelDataSurface);
+	else {
+		return ;
+	}
+	printf("Eprot");	
+	Uint32 rmask, gmask, bmask, amask;
+	SDL_Surface* surface = 0;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+#endif
+
+    surface = SDL_CreateRGBSurface(0, width, height, 32,
+                                   rmask, gmask, bmask, amask);
+                             
+	DrawBitmap2Surface(0, 0, RealBinWidth, RealBinHeight, bmpdata, surface);
 	char buff[255];
-	sprintf(buff, "./output/%d.bmp", data.attr.bmpnumber);
-	printf("file: buff:%s", buff);
-	SDL_SaveBMP(surf, buff);
-	
-    SDL_FreeSurface(surf);
+	sprintf(buff, "./output/%d.bmp", data.attr.bmpnumber);	
+	SDL_SaveBMP(surface, buff);
+//    SDL_FreeSurface(surface);
 }
 
 bool initRealbinFileOpen(const char *realbinfilename, const char *addrbinfilename)
@@ -199,12 +215,13 @@ bool initRealbinFileOpen(const char *realbinfilename, const char *addrbinfilenam
 			if( decoder( g_realgetimagebuf, bmpdata,
 					(unsigned int*)&width, (unsigned int*)&height, &len ) == NULL ){
 					unsigned int bmpNo = tmpadrnbuff.bitmapno;
-					SDL_Log("Jerry Should Export to file?");
-					exportToFile(tmpadrnbuff, bmpdata, width, height);
+//					SDL_Log("Jerry Should Export to file?");
+					//exportToFile(tmpadrnbuff, bmpdata, width, height);
+					exportPNG(tmpadrnbuff, bmpdata, width, height);
 			}
 			else
 			{
-//				exportToFile(tmpadrnbuff, bmpdata, width, height);
+//				ToFile(tmpadrnbuff, bmpdata, width, height);
 			}			
 		}
 		
@@ -405,6 +422,7 @@ int main(int argc, char* argv[])
         printf("Usage : sashrink <command> commands are : unpack, pack\n");
         //return 1;
     }
+    FreeImage_Initialise();
     SDL_Init(SDL_INIT_EVERYTHING);
     init();
     unpacking();
@@ -466,6 +484,8 @@ int main(int argc, char* argv[])
     SDL_DestroyRenderer(renderer);
     SDL_FreeSurface(screenSurface);
     SDL_DestroyTexture(screenTexture);*/
+    
+    FreeImage_DeInitialise();
     SDL_Quit();
     return 0;
 }
